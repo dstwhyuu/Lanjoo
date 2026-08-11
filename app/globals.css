@@ -2,12 +2,90 @@
 
 @theme inline {
   --color-primary: #00BFA5;
+  --color-primary-dark: #00997F;
+  --color-primary-light: #E0F7F3;
   --color-secondary: #FFD54F;
+  --color-secondary-dark: #FFC107;
   --color-tertiary: #263238;
-  --color-neutral: #F3F4F6;
+  --color-neutral: #F5F7FA;
+  --color-neutral-dark: #E8ECF1;
+  --color-danger: #EF4444;
+  --color-danger-light: #FEE2E2;
+  --color-surface: #FFFFFF;
   --font-sans: var(--font-inter);
+
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-slide-up: slide-up 0.4s ease-out both;
+  --animate-scale-in: scale-in 0.3s ease-out both;
+  --animate-shimmer: shimmer 1.5s infinite;
+  --animate-spin-slow: spin 0.8s linear infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, #00BFA5 0%, #00E5C3 100%);
+}
+
+.gradient-hero {
+  background: linear-gradient(160deg, #00BFA5 0%, #00897B 100%);
 }
 
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.3);
+}
+
+.press-scale {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.press-scale:active {
+  transform: scale(0.97);
 }
