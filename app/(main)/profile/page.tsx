@@ -21,20 +21,21 @@ export default async function ProfilePage() {
     redirect('/login?next=/profile')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  const { data: productsData } = await supabase
-    .from('products')
-    .select(`
-      *,
-      seller:profiles!products_seller_id_fkey(full_name, avatar_url, whatsapp_number, campus)
-    `)
-    .eq('seller_id', user.id)
-    .order('created_at', { ascending: false })
+  const [{ data: profile }, { data: productsData }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('products')
+      .select(`
+        *,
+        seller:profiles!products_seller_id_fkey(full_name, avatar_url, whatsapp_number, campus)
+      `)
+      .eq('seller_id', user.id)
+      .order('created_at', { ascending: false }),
+  ])
 
   const allProducts: ProductWithSeller[] = (productsData ?? []).map((p: Record<string, unknown>) => ({
     ...p,
@@ -45,7 +46,7 @@ export default async function ProfilePage() {
   const soldProducts = allProducts.filter((p) => p.status === 'sold')
 
   return (
-    <main className="px-4 py-6 animate-fade-in">
+    <main className="px-4 py-6">
       <div className="rounded-3xl bg-surface p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

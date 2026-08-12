@@ -7,24 +7,25 @@ import type { ProductWithSeller } from '@/types'
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: categoriesData } = await supabase
-    .from('categories')
-    .select('id, name, slug, icon, sort_order')
-    .order('sort_order')
+  const [{ data: categoriesData }, { data: productsData }] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('id, name, slug, icon, sort_order')
+      .order('sort_order'),
+    supabase
+      .from('products')
+      .select(`
+        *,
+        seller:profiles!products_seller_id_fkey(full_name, avatar_url, whatsapp_number, campus)
+      `)
+      .eq('status', 'available')
+      .order('created_at', { ascending: false })
+      .limit(20),
+  ])
 
   const categories = categoriesData && categoriesData.length > 0
     ? [DEFAULT_CATEGORIES[0], ...categoriesData]
     : DEFAULT_CATEGORIES
-
-  const { data: productsData } = await supabase
-    .from('products')
-    .select(`
-      *,
-      seller:profiles!products_seller_id_fkey(full_name, avatar_url, whatsapp_number, campus)
-    `)
-    .eq('status', 'available')
-    .order('created_at', { ascending: false })
-    .limit(20)
 
   const products: ProductWithSeller[] = (productsData ?? []).map((p: Record<string, unknown>) => ({
     ...p,
@@ -32,7 +33,7 @@ export default async function HomePage() {
   })) as ProductWithSeller[]
 
   return (
-    <main className="px-4 py-4 animate-fade-in">
+    <main className="px-4 py-4">
       <section className="mb-4">
         <CategoryChipList categories={categories} activeSlug="all" />
       </section>

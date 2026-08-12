@@ -17,9 +17,7 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function getProduct(id: string) {
-  const supabase = await createClient()
-
+async function getProduct(id: string, supabase: any) {
   const { data } = await supabase
     .from('products')
     .select(`
@@ -48,7 +46,8 @@ async function getProduct(id: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const product = await getProduct(id)
+  const supabase = await createClient()
+  const product = await getProduct(id, supabase)
   if (!product) return { title: 'Produk Tidak Ditemukan' }
 
   return {
@@ -59,14 +58,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id } = await params
-  const product = await getProduct(id)
+  const supabase = await createClient()
+  
+  // Parallelize product fetch and auth check
+  const [product, { data: { user } }] = await Promise.all([
+    getProduct(id, supabase),
+    supabase.auth.getUser()
+  ])
 
   if (!product) notFound()
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const isOwner = user?.id === product.seller_id
-
   const isSold = product.status === 'sold'
   const isReserved = product.status === 'reserved'
 

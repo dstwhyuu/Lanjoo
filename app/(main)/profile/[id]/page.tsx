@@ -15,23 +15,27 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const [profileResult, productsResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('products')
+      .select(`
+        *,
+        seller:profiles!products_seller_id_fkey(full_name, avatar_url, whatsapp_number, campus)
+      `)
+      .eq('seller_id', id)
+      .eq('status', 'available')
+      .order('created_at', { ascending: false })
+  ])
+
+  const { data: profile } = profileResult
+  const { data: productsData } = productsResult
 
   if (!profile) notFound()
-
-  const { data: productsData } = await supabase
-    .from('products')
-    .select(`
-      *,
-      seller:profiles!products_seller_id_fkey(full_name, avatar_url, whatsapp_number, campus)
-    `)
-    .eq('seller_id', id)
-    .eq('status', 'available')
-    .order('created_at', { ascending: false })
 
   const products: ProductWithSeller[] = (productsData ?? []).map((p: Record<string, unknown>) => ({
     ...p,
